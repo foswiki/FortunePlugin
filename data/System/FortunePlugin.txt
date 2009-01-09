@@ -1,0 +1,82 @@
+%META:TOPICINFO{author="BaseUserMapping_333" date="1231212263" format="1.1" reprev="1.4" version="1.4"}%
+---+ Fortune Plugin
+ This plugin uses the Unix/Linux =fortune= command to insert a random fortune into a topic. On windows environments, or if =fortune= is not installed, it uses the CPAN =Fortune= implementation. 
+---++ Usage
+ The following macros are implemented: 
+   * =%%NOP%FORTUNE{"database"}%= Insert a random fortune into the topic from the named "database".
+   * =%%NOP%FORTUNE_LIST{"database"}%= List the contents of the named database
+   * =%%NOP%FORTUNE_DB_LIST{}%= List the available database files in the fortune directory.
+
+---++ Examples
+---+++ Example: =%%NOP%FORTUNE{"foswiki"}%=
+ If installed, a random fortune from the foswiki database will appear here: <blockquote>
+%FORTUNE{"foswiki"}% </blockquote>
+
+---+++ 
+---+++ Example: =%%NOP%FORTUNE_LIST{"foswiki"}%=
+ If installed, the list of fortunes in the foswiki database 
+---+++ 
+ <blockquote>
+%FORTUNE_LIST{"foswiki"}% </blockquote>
+
+---+++ Example: =%%NOP%FORTUNE_DB_LIST{}%=
+ If installed, the list of fortune databases is shown. 
+---+++ 
+ <blockquote> %FORTUNE_DB_LIST{}% </blockquote>
+
+---++ Plugin Preferences
+ There are no perferences that can be set for this plugin. All configuration parameters are set in =LocalSite.cfg= using the =bin/configure= interface.
+
+---++ Installation
+   * Install FortunePlugin using the =bin/configure= interface
+   * If =fortune_mod= is installed on a *nix system 
+      * Set the ={Plugins}{FortunePlugin}{FortuneDBPath}= to point to the directory containing the fortune files. Typically this is in =/usr/share/fortune/=. Trailing slash must be included.
+      * Set the ={Plugins}{FortunePlugin}{FortuneProgram}= to point to the fortune program. Typically =/usr/bin/fortune=.
+   * On a windows system, or if =fortune= is not installed: 
+      * Install the Fortune module using CPAN
+      * leave ={Plugins}{FortunePlugin}{FortuneProgram}= unset.
+      * leave ={Plugins}{FortunePlugin}{FortuneDBPath}= unset. The plugin will use fortune files attached to this topic. Or if other fortune files are available, point to the directory containing the fortune files. Typically this is in =/usr/share/fortune/=. Trailing slash must be included.
+
+---++ Creating new fortune files
+
+Fortune files must be created by using the =strfile= command that is installed on Linux with the =fortune-mod= package. On Windows environments this can be installed using cygwin. This is beyond the scope of this document.
+
+---+++ Create the fortune text file
+
+Using your favorite editor, build a simple text file consisting of each quote, followed by a single line containing a percent-sign ( =%= ) For example, file =foswiki= contains:
+
+<sticky>
+<pre>
+Today there are a variety of wikis, one of them being the wiki you are presently looking at. 
+%
+Foswiki can be extended with hundreds of plugins 
+% 
+</pre>
+</sticky>
+
+---+++ Build the fortune database
+
+"Compile" the file into a =.dat= file using =strfile=
+<sticky>
+<pre>
+&gt; ~ $ strfile foswiki 
+"foswiki.dat" created 
+There were 2 strings 
+Longest string: 93 bytes 
+Shortest string: 49 bytes 
+</pre>
+</sticky>
+
+The original =foswiki= file and the related =foswiki.dat= file must be placed in the fortune database directory.
+
+---++ Plugin Info
+
+|  Author: | Foswiki:Main.GeorgeClark |
+|  Copyright: | © 2008, Foswiki Contributors |
+|  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
+|  Version: | %$VERSION% |
+|  Home: | http://foswiki.org/Extensions/%TOPIC%Dev |
+|  Feedback: | http://foswiki.org/Extensions/%TOPIC%Dev |
+
+%META:FILEATTACHMENT{name="foswiki" attachment="foswiki" attr="" comment="" date="1231128584" path="foswiki" size="1323" stream="IO::File=GLOB(0x9d599a8)" tmpFilename="/usr/tmp/CGItemp11681" user="BaseUserMapping_333" version="1"}%
+%META:FILEATTACHMENT{name="foswiki.dat" attachment="foswiki.dat" attr="" comment="" date="1231128606" path="foswiki.dat" size="72" stream="IO::File=GLOB(0x97fe450)" tmpFilename="/usr/tmp/CGItemp11713" user="BaseUserMapping_333" version="1"}%

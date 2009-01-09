@@ -1,0 +1,4 @@
+data/System/FortunePlugin.txt 0644
+lib/Foswiki/Plugins/FortunePlugin.pm 0644
+lib/Foswiki/Plugins/FortunePlugin/Config.spec 0644
+
