@@ -30,7 +30,7 @@ use base qw( Foswiki::Contrib::Build );
 
 sub new {
     my $class = shift;
-    return bless( $class->SUPER::new("EmptyPlugin"), $class );
+    return bless( $class->SUPER::new("FortunePlugin"), $class );
 }
 
 # Example: Override the build target

@@ -1,0 +1,23 @@
+Today there are a variety of wikis, one of them being the wiki you are presently looking at.
+%
+Foswiki can be extended with hundreds of plugins
+%
+In the WYSIWYG Editor, click the pick-axe symbol to switch to the raw editor
+%
+Subscribing to WebNotify will enable Foswiki to send you details of changes made on topics.
+%
+The breadcrumb displayed with a particular Foswiki topic is constructed with a topic's Parent.  
+Use the "More Topic Actions" link if you want to change the topic parent.
+%
+You can disable automatic linking of WikiWords by surrounding the text with &lt;noautolink> and &lt;/noautolink>
+%
+The breadcrumb of a topic shows you page hierarchy. It is constructed using a topic's parent setting, following the parents up to the web level.
+%
+To encourage collaboration, instead of restricting edit, allow anyone to edit topics, and use WebNotify and revision controls to deal with undesired changes.
+%
+If you need a list of topics, considering using the %SEARCH macro to automatically populate the list.
+%
+To disable the WYSIWYG editor on a topic, add the setting TINYMCEPLUGIN_DISABLE = 1  to the topic.
+%
+You can customize Foswiki by overriding settings in your UserName topic.  For example, if you want to disable the WYSIWYG editor for all of your edits, set TINYMCEPLUGIN_DISABLE = 1 in your user topic.
+%

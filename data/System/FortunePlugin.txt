@@ -1,18 +1,19 @@
-%META:TOPICINFO{author="BaseUserMapping_333" date="1231212263" format="1.1" reprev="1.4" version="1.4"}%
+%META:TOPICINFO{author="ProjectContributor" date="1232167030" format="1.1" reprev="1.6" version="1.6"}%
 ---+ Fortune Plugin
  This plugin uses the Unix/Linux =fortune= command to insert a random fortune into a topic. On windows environments, or if =fortune= is not installed, it uses the CPAN =Fortune= implementation. 
 ---++ Usage
  The following macros are implemented: 
-   * =%%NOP%FORTUNE{"database"}%= Insert a random fortune into the topic from the named "database".
+   * =%%NOP%FORTUNE{"database" LENGTH="S"}%= Insert a random fortune into the topic from the named "database".
+      * LENGTH parameter (optional) can be set to S or SHORT to select short fortunes, and L or LONG for long fortunes.  This option only works if the unix =fortune-mod= program is used.
    * =%%NOP%FORTUNE_LIST{"database"}%= List the contents of the named database
    * =%%NOP%FORTUNE_DB_LIST{}%= List the available database files in the fortune directory.
+   * Set TINYMCEPLUGIN_DISABLE = 1
 
----++ Examples
----+++ Example: =%%NOP%FORTUNE{"foswiki"}%=
+---++ Examples 
+---+++ Example: =%%NOP%FORTUNE{"foswiki" LENGTH="S"}%=
  If installed, a random fortune from the foswiki database will appear here: <blockquote>
-%FORTUNE{"foswiki"}% </blockquote>
+%FORTUNE{"foswiki" LENGTH="S"}% </blockquote>
 
----+++ 
 ---+++ Example: =%%NOP%FORTUNE_LIST{"foswiki"}%=
  If installed, the list of fortunes in the foswiki database 
 ---+++ 
@@ -20,7 +21,7 @@
 %FORTUNE_LIST{"foswiki"}% </blockquote>
 
 ---+++ Example: =%%NOP%FORTUNE_DB_LIST{}%=
- If installed, the list of fortune databases is shown. 
+ If installed, the list of fortune databases is shown.   Note that two different format results are possible.  The Unix =fortune-mod= program reports the percentage of fortunes supplied by each file.  The Perl =Fortune= module shows a simple fortune count.
 ---+++ 
  <blockquote> %FORTUNE_DB_LIST{}% </blockquote>
 
@@ -78,5 +79,5 @@ The original =foswiki= file and the related =foswiki.dat= file must be placed in
 |  Home: | http://foswiki.org/Extensions/%TOPIC%Dev |
 |  Feedback: | http://foswiki.org/Extensions/%TOPIC%Dev |
 
-%META:FILEATTACHMENT{name="foswiki" attachment="foswiki" attr="" comment="" date="1231128584" path="foswiki" size="1323" stream="IO::File=GLOB(0x9d599a8)" tmpFilename="/usr/tmp/CGItemp11681" user="BaseUserMapping_333" version="1"}%
-%META:FILEATTACHMENT{name="foswiki.dat" attachment="foswiki.dat" attr="" comment="" date="1231128606" path="foswiki.dat" size="72" stream="IO::File=GLOB(0x97fe450)" tmpFilename="/usr/tmp/CGItemp11713" user="BaseUserMapping_333" version="1"}%
+%META:FILEATTACHMENT{name="foswiki" attachment="foswiki" attr="" comment="" date="1231128584" path="foswiki" size="1323" stream="IO::File=GLOB(0x9d599a8)" tmpFilename="/usr/tmp/CGItemp11681" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="foswiki.dat" attachment="foswiki.dat" attr="" comment="" date="1231128606" path="foswiki.dat" size="72" stream="IO::File=GLOB(0x97fe450)" tmpFilename="/usr/tmp/CGItemp11713" user="ProjectContributor" version="1"}%

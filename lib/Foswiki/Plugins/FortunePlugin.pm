@@ -120,15 +120,6 @@ sub initPlugin {
         return 0;
     }
 
-    # Example code of how to get a preference value, register a macro
-    # handler and register a RESTHandler (remove code you do not need)
-
-    # Set your per-installation plugin configuration in LocalSite.cfg,
-    # like this:
-    # $Foswiki::cfg{Plugins}{EmptyPlugin}{ExampleSetting} = 1;
-    # Optional: See %SYSTEMWEB%.DevelopingPlugins#ConfigSpec for information
-    # on integrating your plugin configuration with =configure=.
-
     $fortune_bin = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneProgram}
       || "";    # If not set, use Perl Fortune from CPAN
 
@@ -145,7 +136,7 @@ sub initPlugin {
     $fortune_db = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath}
       || Foswiki::Func::getPubDir()
       . "/$Foswiki::cfg{SystemWebName}"
-      . "/FortunePlugin";
+      . "/FortunePlugin/";
 
     unless ( $fortune_db && ( -d $fortune_db ) ) {
         Foswiki::Func::writeWarning('FortuneDBPath not provided or not found ');
@@ -177,16 +168,36 @@ for the fortune.
 sub _FORTUNE {
     my ( $session, $params, $theTopic, $theWeb ) = @_;
 
-    my $db = $params->{_DEFAULT} || "foswiki";
+    my $db  = $params->{_DEFAULT} || "foswiki";
+    my $len = $params->{LENGTH}   || "";
+
+    if ($len) {
+        if ( $len =~ m/^(SHORT|S)$/o ) {
+            $len = "-s";
+        }
+        else {
+            if ( $len =~ m/^(LONG|L)$/o ) {
+                $len = "-l";
+            }
+            else {
+                return
+"<font color=\"red\"><nop>Fortune Error: Length paremater must be SHORT, LONG, S or L. (was: $len)</font>";
+            }
+        }
+    }
 
     if ($fortune_bin) {
         my ( $output, $exit ) =
-          Foswiki::Sandbox->sysCommand( "$fortune_bin %DATABASE|F% ",
+          Foswiki::Sandbox->sysCommand( "$fortune_bin %DATABASE|U% $len ",
             DATABASE => "$db" );
         return $output;
     }
     else {
-        my $ffile = new Fortune( "$fortune_db" . "$db" );
+        my $ffile = undef;
+        eval { $ffile = new Fortune( "$fortune_db" . "$db" ); };
+        if ($@) {
+            return " *Error - Problem handling $fortune_db $db* \n";
+        }
         $ffile->read_header();
         return ( $ffile->get_random_fortune() );
     }
@@ -218,23 +229,29 @@ sub _FORTUNE_LIST {
         my ( $output, $exit ) =
           Foswiki::Sandbox->sysCommand( "$fortune_bin -m .*  %DATABASE|F% ",
             DATABASE => "$db" );
-       $output =~ s/\n/<br \/>/g;                                # Newlines become breaks
-       $output =~ s/<br \/>%<br \/>/\n<li>/g;                    # Percents become list entries
-       $output =~ s/<li>$//g;                         # Remove trailing entry
-       return "<ul><li>" . $output . "\n </ul>\n";
+        $output =~ s/\n/<br \/>/g;                # Newlines become breaks
+        $output =~ s/<br \/>%<br \/>/\n<li>/g;    # Percents become list entries
+        $output =~ s/<li>$//g;                    # Remove trailing entry
+        return "<ul><li>" . $output . "\n </ul>\n";
     }
     else {
-        my $ffile = new Fortune( "$fortune_db" . "$db" );
+        my $ffile = undef;
+        eval { $ffile = new Fortune( "$fortune_db" . "$db" ); };
+        if ($@) {
+            return " *Error - Problem handling $fortune_db $db* \n";
+        }
         $ffile->read_header();
-        my $num_fortunes = $ffile->num_fortunes ();
-        &Foswiki::Func::writeDebug( "FortunePlugin  - " . $num_fortunes  .  $fortune_db  .  $db );
+        my $num_fortunes = $ffile->num_fortunes();
+        &Foswiki::Func::writeDebug(
+            "FortunePlugin  - " . $num_fortunes . $fortune_db . $db );
         my $output = "<ul>";
-        for (my $i = 0; $i < $num_fortunes; $i++) {
-            &Foswiki::Func::writeDebug( "FortunePlugin  - " . $i . " = " . $ffile->read_fortune($i) );
-            $output .= "<li>" . $ffile->read_fortune ($i) ; 
-            }
-        $output .= "\n</ul>\n";    
-        return  $output ;
+        for ( my $i = 0 ; $i < $num_fortunes ; $i++ ) {
+            &Foswiki::Func::writeDebug(
+                "FortunePlugin  - " . $i . " = " . $ffile->read_fortune($i) );
+            $output .= "<li>" . $ffile->read_fortune($i);
+        }
+        $output .= "\n</ul>\n";
+        return $output;
     }
 
 }
@@ -257,13 +274,32 @@ to count the number of fortunes in the file.
 sub _FORTUNE_DB_LIST {
     my ( $session, $params, $theTopic, $theWeb ) = @_;
 
-    #SMELL:  "fortune -f" sends the results to stderr.  So Sandbox cannot be used.
+  #SMELL:  "fortune -f" sends the results to stderr.  So Sandbox cannot be used.
 
+    my $output = undef;
     if ($fortune_bin) {
-       my $output = `$fortune_bin -f 2>&1`;
-       return "<pre>" . $output . "\n </pre>\n";
+        $output = `$fortune_bin -f 2>&1`;
+        return "<pre>" . $output . "\n </pre>\n";
     }
-
+    else {
+        opendir( DIR, $fortune_db )
+          || die "<ERR> Can't find directory --> $fortune_db !";
+        my @fdbs = grep { /\.dat$/ } readdir(DIR);
+        @fdbs   = sort (@fdbs);
+        $output = "\n| *Fortune Count* | *Database Name* |\n";
+        foreach my $fdb (@fdbs) {
+            $fdb = substr( $fdb, 0, -4 );
+            my $ffile = undef;
+            eval { $ffile = new Fortune( "$fortune_db" . "$fdb" ); };
+            if ($@) {
+                return " *Error - Problem handling $fortune_db.$fdb* \n";
+            }
+            $ffile->read_header();
+            $output .= "| " . $ffile->num_fortunes() . " | " . $fdb . " |\n";
+        }
+        $output .= "\n</ul>\n";
+        return $output;
+    }
 }
 
 1;
