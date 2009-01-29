@@ -2,51 +2,14 @@
 
 =begin TML
 
----+ package EmptyPlugin
+---+ package FortunePlugin
 
-Foswiki plugins 'listen' to events happening in the core by registering an
-interest in those events. They do this by declaring 'plugin handlers'. These
-are simply functions with a particular name that, if they exist in your
-plugin, will be called by the core.
-
-This is an empty Foswiki plugin. It is a fully defined plugin, but is
-disabled by default in a Foswiki installation. Use it as a template
-for your own plugins.
-
-To interact with Foswiki use ONLY the official APIs
-documented in %SYSTEMWEB%.DevelopingPlugins. <strong>Do not reference any
-packages, functions or variables elsewhere in Foswiki</strong>, as these are
-subject to change without prior warning, and your plugin may suddenly stop
-working.
-
-Error messages can be output using the =Foswiki::Func= =writeWarning= and
-=writeDebug= functions. You can also =print STDERR=; the output will appear
-in the webserver error log. Most handlers can also throw exceptions (e.g.
-[[%SCRIPTURL{view}%/%SYSTEMWEB%/PerlDoc?module=Foswiki::OopsException][Foswiki::OopsException]])
-
-For increased performance, all handler functions except =initPlugin= are
-commented out below. *To enable a handler* remove the leading =#= from
-each line of the function. For efficiency and clarity, you should
-only uncomment handlers you actually use.
-
-__NOTE:__ When developing a plugin it is important to remember that
-
-Foswiki is tolerant of plugins that do not compile. In this case,
-the failure will be silent but the plugin will not be available.
-See %SYSTEMWEB%.InstalledPlugins for error messages.
-
-__NOTE:__ Foswiki:Development.StepByStepRenderingOrder helps you decide which
-rendering handler to use. When writing handlers, keep in mind that these may
-be invoked
-
-on included topics. For example, if a plugin generates links to the current
-topic, these need to be generated before the =afterCommonTagsHandler= is run.
-After that point in the rendering loop we have lost the information that
-the text had been included from another topic.
+Fortune Plugin will run either the Unix fortune_mod program "fortune" to access
+the traditional fortune database, or alternatively will use the CPAN Fortune 
+module to access fortunes.
 
 =cut
 
-# change the package name!!!
 package Foswiki::Plugins::FortunePlugin;
 
 # Always use strict to enforce variable scoping
@@ -92,21 +55,6 @@ use vars qw($fortune_db $fortune_bin);
    * =$user= - the login name of the user
    * =$installWeb= - the name of the web the plugin topic is in
      (usually the same as =$Foswiki::cfg{SystemWebName}=)
-
-*REQUIRED*
-
-Called to initialise the plugin. If everything is OK, should return
-a non-zero value. On non-fatal failure, should write a message
-using =Foswiki::Func::writeWarning= and return 0. In this case
-%<nop>FAILEDPLUGINS% will indicate which plugins failed.
-
-In the case of a catastrophic failure that will prevent the whole
-installation from working safely, this handler may use 'die', which
-will be trapped and reported in the browser.
-
-__Note:__ Please align macro names with the Plugin name, e.g. if
-your Plugin is called !FooBarPlugin, name macros FOOBAR and/or
-FOOBARSOMETHING. This avoids namespace issues.
 
 =cut
 
@@ -157,11 +105,8 @@ sub initPlugin {
 Primary macro for the FortunePlugin.  Returns a single random fortune 
 from a random database.  
 
-Optional parameters is a list of one or more databases to be used 
-for the fortune.
-
   %<nop>FORTUNE{}%
-  %<nop<FORTUNE{"foswiki,scifi"}%
+  %<nop<FORTUNE{"foswiki"}%
 
 =cut
 
@@ -304,11 +249,11 @@ sub _FORTUNE_DB_LIST {
 
 1;
 __END__
-This copyright information applies to the EmptyPlugin:
+This copyright information applies to the FortunePlugin:
 
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# EmptyPlugin is Copyright (C) 2008 Foswiki Contributors. Foswiki Contributors
+# FortunePlugin is Copyright (C) 2008 Foswiki Contributors. Foswiki Contributors
 # are listed in the AUTHORS file in the root of this distribution.
 # NOTE: Please extend that file, not this notice.
 # Additional copyrights apply to some or all of the code as follows:
@@ -317,7 +262,7 @@ This copyright information applies to the EmptyPlugin:
 # and TWiki Contributors. All Rights Reserved. Foswiki Contributors
 # are listed in the AUTHORS file in the root of this distribution.
 #
-# This license applies to EmptyPlugin *and also to any derivatives*
+# This license applies to FortunePlugin *and also to any derivatives*
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
