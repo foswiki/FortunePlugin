@@ -45,7 +45,8 @@ our $SHORTDESCRIPTION =
 # and topic level.
 our $NO_PREFS_IN_TOPIC = 1;
 
-use vars qw($fortune_db $fortune_bin);
+my $fortune_db; 
+my $fortune_bin;
 
 =begin TML
 
@@ -63,7 +64,7 @@ sub initPlugin {
 
     # check for Plugins.pm versions
     if ( $Foswiki::Plugins::VERSION < 2.0 ) {
-        Foswiki::Func::writeWarning( 'Version mismatch between ',
+        Foswiki::Func::writeDebug( 'Version mismatch between ',
             __PACKAGE__, ' and Plugins.pm' );
         return 0;
     }
@@ -74,20 +75,27 @@ sub initPlugin {
     unless ($fortune_bin) {
         eval "require Fortune";
         if ($@) {
-            Foswiki::Func::writeWarning(
-'Perl CPAN module \"Fortune\" could not be found and FortuneProgram not set in LocalSite.cfg'
+            Foswiki::Func::writeDebug(
+'Perl CPAN module \"Fortune\" could not be found and FortuneProgram not set in LocalSite.cfg - assuming fortune in path'
             );
-            return 0;
+            $fortune_bin = 'fortune';
         }
     }
 
-    $fortune_db = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath}
-      || Foswiki::Func::getPubDir()
+    $fortune_db = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath};
+    if ($fortune_db eq '') {
+      $fortune_db = Foswiki::Func::getPubDir()
       . "/$Foswiki::cfg{SystemWebName}"
       . "/FortunePlugin/";
+      } else {
+      if ($fortune_db eq 'system') {
+          $fortune_db = '';
+          }
+      }
+   Foswiki::Func::writeDebug("FortuneDBPath set to $fortune_db ");
 
-    unless ( $fortune_db && ( -d $fortune_db ) ) {
-        Foswiki::Func::writeWarning('FortuneDBPath not provided or not found ');
+    if ( $fortune_db && !( -d $fortune_db ) ) {
+        Foswiki::Func::writeDebug('provided FortuneDBPath not found ');
         return 0;
     }
 
@@ -132,9 +140,11 @@ sub _FORTUNE {
     }
 
     if ($fortune_bin) {
+        my $cdb = $fortune_db . $db;
         my ( $output, $exit ) =
           Foswiki::Sandbox->sysCommand( "$fortune_bin %DATABASE|U% $len ",
-            DATABASE => "$db" );
+            DATABASE => "$cdb" );
+          Foswiki::Func::writeDebug( "$fortune_bin Length $len Database ^$cdb^" );
         return $output;
     }
     else {
@@ -171,9 +181,10 @@ sub _FORTUNE_LIST {
     my $db = $params->{_DEFAULT} || "foswiki";
 
     if ($fortune_bin) {
+        my $cdb = $fortune_db . $db;
         my ( $output, $exit ) =
-          Foswiki::Sandbox->sysCommand( "$fortune_bin -m .*  %DATABASE|F% ",
-            DATABASE => "$db" );
+          Foswiki::Sandbox->sysCommand( "$fortune_bin -m \".*\"  %DATABASE|F% ",
+            DATABASE => "$cdb" );
         $output =~ s/\n/<br \/>/g;                # Newlines become breaks
         $output =~ s/<br \/>%<br \/>/\n<li>/g;    # Percents become list entries
         $output =~ s/<li>$//g;                    # Remove trailing entry
@@ -223,7 +234,8 @@ sub _FORTUNE_DB_LIST {
 
     my $output = undef;
     if ($fortune_bin) {
-        $output = `$fortune_bin -f 2>&1`;
+        $output = `$fortune_bin -f $fortune_db 2>&1`;
+        $output =~ s/^100.*+$//m; #Remove the file path statement.  Don't reveal system information.
         return "<pre>" . $output . "\n </pre>\n";
     }
     else {

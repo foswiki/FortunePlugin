@@ -68,7 +68,12 @@ Shortest string: 49 bytes
 </pre>
 </sticky>
 
-The original =foswiki= file and the related =foswiki.dat= file must be placed in the fortune database directory.
+The original =foswiki= file and the related =foswiki.dat= file can be placed
+in the fortune database directory.  Or attach it to this topic or to another
+topic identified in the Foswiki configuration.  
+
+For easiest system maintenance and upgrades, it is not recommended to modify
+or attach files to this topic!
 
 ---++ Plugin Info
 

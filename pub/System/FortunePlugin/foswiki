@@ -21,3 +21,11 @@ To disable the WYSIWYG editor on a topic, add the setting TINYMCEPLUGIN_DISABLE 
 %
 You can customize Foswiki by overriding settings in your UserName topic.  For example, if you want to disable the WYSIWYG editor for all of your edits, set TINYMCEPLUGIN_DISABLE = 1 in your user topic.
 %
+Foswiki extensions greatly expand the capabilities of Foswiki - See http://foswiki.org/Extensions
+%
+Several plugins are available to support export of Foswiki topics into PDF documents.
+%
+ExplicitNumberingPlugin enables multiple sequential numbered lists within topics
+%
+SpreadsheetPlugin can be used to pass variables between included topics.
+%
