@@ -29,3 +29,7 @@ ExplicitNumberingPlugin enables multiple sequential numbered lists within topics
 %
 SpreadsheetPlugin can be used to pass variables between included topics.
 %
+Using Regular Expressions to search Meta?  Use the new QuerySearch
+%
+If external apps write attachments into the pub directory path,  use UpdateAttachmentsPlugin instead of AutoAttachPubFiles
+%

@@ -83,15 +83,14 @@ sub initPlugin {
     }
 
     $fortune_db = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath};
-    if ($fortune_db eq '') {
+    if (! length($fortune_db)) {
       $fortune_db = Foswiki::Func::getPubDir()
       . "/$Foswiki::cfg{SystemWebName}"
       . "/FortunePlugin/";
-      } else {
-      if ($fortune_db eq 'system') {
+      } elsif ($fortune_db eq 'system') {
           $fortune_db = '';
           }
-      }
+
    Foswiki::Func::writeDebug("FortuneDBPath set to $fortune_db ");
 
     if ( $fortune_db && !( -d $fortune_db ) ) {
