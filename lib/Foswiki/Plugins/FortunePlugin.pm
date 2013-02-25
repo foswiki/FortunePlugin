@@ -23,7 +23,7 @@ require Foswiki::Plugins;    # For the API version
 # This should always be $Rev$ so that Foswiki can determine the checked-in
 # status of the plugin. It is used by the build automation tools, so
 # you should leave it alone.
-our $VERSION = '$Rev$';
+our $VERSION = '0.9';
 
 # This is a free-form string you can use to "name" your own plugin version.
 # It is *not* used by the build automation tools, but is reported as part
@@ -267,7 +267,9 @@ This copyright information applies to the FortunePlugin:
 
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# FortunePlugin is Copyright (C) 2008 Foswiki Contributors. Foswiki Contributors
+# FortunePlugin is Copyright (C) 2008, 2013 Foswiki Contributors.
+#
+# Foswiki Contributors
 # are listed in the AUTHORS file in the root of this distribution.
 # NOTE: Please extend that file, not this notice.
 # Additional copyrights apply to some or all of the code as follows:

@@ -78,11 +78,10 @@ or attach files to this topic!
 ---++ Plugin Info
 
 |  Author: | Foswiki:Main.GeorgeClark |
-|  Copyright: | © 2008, Foswiki Contributors |
+|  Copyright: | © 2008, 2013 Foswiki Contributors |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Version: | %$VERSION% |
-|  Home: | http://foswiki.org/Extensions/%TOPIC%Dev |
-|  Feedback: | http://foswiki.org/Extensions/%TOPIC%Dev |
+|  Home: | http://foswiki.org/Extensions/%TOPIC% |
 
 %META:FILEATTACHMENT{name="foswiki" attachment="foswiki" attr="" comment="" date="1231128584" path="foswiki" size="1323" stream="IO::File=GLOB(0x9d599a8)" tmpFilename="/usr/tmp/CGItemp11681" user="ProjectContributor" version="1"}%
 %META:FILEATTACHMENT{name="foswiki.dat" attachment="foswiki.dat" attr="" comment="" date="1231128606" path="foswiki.dat" size="72" stream="IO::File=GLOB(0x97fe450)" tmpFilename="/usr/tmp/CGItemp11713" user="ProjectContributor" version="1"}%
