@@ -33,6 +33,7 @@ my $fortune_db;
 my $fdb_vol;
 my $fdb_path;
 my $fortune_bin;
+my $debug;
 
 =begin TML
 
@@ -55,6 +56,9 @@ sub initPlugin {
         return 0;
     }
 
+    # Get plugin debug flag
+    $debug = Foswiki::Func::getPreferencesFlag('FORTUNEPLUGIN_DEBUG');
+
     $fortune_bin = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneProgram}
       || "";    # If not set, use Perl Fortune from CPAN
 
@@ -63,7 +67,7 @@ sub initPlugin {
         if ($@) {
             Foswiki::Func::writeDebug(
 'Perl CPAN module \"Fortune\" could not be found and FortuneProgram not set in LocalSite.cfg - assuming fortune in path'
-            );
+            ) if ($debug);
             $fortune_bin = 'fortune';
         }
     }
@@ -82,7 +86,7 @@ sub initPlugin {
     ( $fdb_vol, $fdb_path, ) = File::Spec->splitpath( $fdb, 1 );
     $fdb = File::Spec->catpath( $fdb_vol, $fdb_path, '' );
 
-    Foswiki::Func::writeDebug("FortuneDBPath set to $fdb ");
+    Foswiki::Func::writeDebug("FortuneDBPath set to $fdb ") if ($debug);
 
     if ( $fdb && !( -d $fdb ) ) {
         Foswiki::Func::writeDebug("provided FortuneDBPath ($fdb) not found ");
@@ -101,7 +105,7 @@ sub initPlugin {
 
 ---++ _FORTUNE
 Primary macro for the FortunePlugin.  Returns a single random fortune
-from a random database. 
+from a random database.
 
   %<nop>FORTUNE{}%
   %<nop<FORTUNE{"foswiki"}%
@@ -140,7 +144,8 @@ sub _FORTUNE {
         my ( $output, $exit ) =
           Foswiki::Sandbox->sysCommand( "$fortune_bin %DATABASE|U% $len ",
             DATABASE => "$fdb" );
-        Foswiki::Func::writeDebug("$fortune_bin Length $len Database ^$fdb^");
+        Foswiki::Func::writeDebug("$fortune_bin Length $len Database ^$fdb^")
+          if ($debug);
         return $output;
     }
     else {
@@ -186,7 +191,8 @@ sub _FORTUNE_LIST {
         my ( $output, $exit ) =
           Foswiki::Sandbox->sysCommand( "$fortune_bin -m .*  %DATABASE|F% ",
             DATABASE => "$fdb" );
-        Foswiki::Func::writeDebug("$fortune_bin -m '.*' Database ^$fdb^");
+        Foswiki::Func::writeDebug("$fortune_bin -m '.*' Database ^$fdb^")
+          if ($debug);
         $output =~ s/\n/<br \/>/g;                # Newlines become breaks
         $output =~ s/<br \/>%<br \/>/\n<li>/g;    # Percents become list entries
         $output =~ s/<li>$//g;                    # Remove trailing entry
@@ -200,12 +206,13 @@ sub _FORTUNE_LIST {
         }
         $ffile->read_header();
         my $num_fortunes = $ffile->num_fortunes();
-        &Foswiki::Func::writeDebug(
-            "FortunePlugin  - " . $num_fortunes . $fdb );
+        Foswiki::Func::writeDebug( "FortunePlugin  - " . $num_fortunes . $fdb )
+          if ($debug);
         my $output = "<ul>";
         for ( my $i = 0 ; $i < $num_fortunes ; $i++ ) {
-            &Foswiki::Func::writeDebug(
-                "FortunePlugin  - " . $i . " = " . $ffile->read_fortune($i) );
+
+ #Foswiki::Func::writeDebug(
+ #    "FortunePlugin  - " . $i . " = " . $ffile->read_fortune($i) ) if ($debug);
             $output .= "<li> " . $ffile->read_fortune($i);
         }
         $output .= "\n</ul>\n";
