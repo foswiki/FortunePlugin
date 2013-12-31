@@ -1,0 +1,1 @@
+Fortune,>=0.2,cpan,Optional, required if system does not have the fortune-mod package installed

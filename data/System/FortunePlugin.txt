@@ -1,42 +1,50 @@
 %META:TOPICINFO{author="ProjectContributor" date="1232167030" format="1.1" reprev="1.6" version="1.6"}%
 ---+ Fortune Plugin
- This plugin uses the Unix/Linux =fortune= command to insert a random fortune into a topic. On windows environments, or if =fortune= is not installed, it uses the CPAN =Fortune= implementation. 
+ This plugin uses the Unix/Linux =fortune= command to insert a random fortune into a topic. On windows environments, or if =fortune= is not installed, it uses the CPAN =Fortune= implementation.
 ---++ Usage
- The following macros are implemented: 
+ The following macros are implemented:
    * =%%NOP%FORTUNE{"database" LENGTH="S"}%= Insert a random fortune into the topic from the named "database".
       * LENGTH parameter (optional) can be set to S or SHORT to select short fortunes, and L or LONG for long fortunes.  This option only works if the unix =fortune-mod= program is used.
    * =%%NOP%FORTUNE_LIST{"database"}%= List the contents of the named database
    * =%%NOP%FORTUNE_DB_LIST{}%= List the available database files in the fortune directory.
-   * Set TINYMCEPLUGIN_DISABLE = 1
 
----++ Examples 
+---++ Examples
 ---+++ Example: =%%NOP%FORTUNE{"foswiki" LENGTH="S"}%=
  If installed, a random fortune from the foswiki database will appear here: <blockquote>
 %FORTUNE{"foswiki" LENGTH="S"}% </blockquote>
 
 ---+++ Example: =%%NOP%FORTUNE_LIST{"foswiki"}%=
- If installed, the list of fortunes in the foswiki database 
----+++ 
+ If installed, the list of fortunes in the foswiki database
  <blockquote>
 %FORTUNE_LIST{"foswiki"}% </blockquote>
 
 ---+++ Example: =%%NOP%FORTUNE_DB_LIST{}%=
  If installed, the list of fortune databases is shown.   Note that two different format results are possible.  The Unix =fortune-mod= program reports the percentage of fortunes supplied by each file.  The Perl =Fortune= module shows a simple fortune count.
----+++ 
  <blockquote> %FORTUNE_DB_LIST{}% </blockquote>
 
 ---++ Plugin Preferences
  There are no perferences that can be set for this plugin. All configuration parameters are set in =LocalSite.cfg= using the =bin/configure= interface.
 
----++ Installation
-   * Install FortunePlugin using the =bin/configure= interface
-   * If =fortune_mod= is installed on a *nix system 
-      * Set the ={Plugins}{FortunePlugin}{FortuneDBPath}= to point to the directory containing the fortune files. Typically this is in =/usr/share/fortune/=. Trailing slash must be included.
-      * Set the ={Plugins}{FortunePlugin}{FortuneProgram}= to point to the fortune program. Typically =/usr/bin/fortune=.
-   * On a windows system, or if =fortune= is not installed: 
+---++ Installation and Configuration
+   * Install FortunePlugin using the =bin/configure= interface or the FortunePlugin_installer from the shell.
+   * If =fortune_mod= is installed on a *nix system
+      * Using =bin/configure= in the Extensions !FortunePlugin tab, set ={Plugins}{FortunePlugin}{FortuneProgram}= to point to the fortune program. Typically =/usr/bin/fortune=.
+      * If you want to use the System provided fortune files, set the ={Plugins}{FortunePlugin}{FortuneDBPath}= to point to the directory containing the fortune files. Typically this is in =/usr/share/fortune=.   If you don't set this, then Fortune will use fortune files attached to System.FortunePlugin topic.
+   * On a windows system, or if =fortune_mod= is not installed:
       * Install the Fortune module using CPAN
       * leave ={Plugins}{FortunePlugin}{FortuneProgram}= unset.
       * leave ={Plugins}{FortunePlugin}{FortuneDBPath}= unset. The plugin will use fortune files attached to this topic. Or if other fortune files are available, point to the directory containing the fortune files. Typically this is in =/usr/share/fortune/=. Trailing slash must be included.
+   * To enable debug, add the following set to Main.SitePreferences:
+<verbatim>
+      * Set FORTUNEPLUGIN_DEBUG = 1
+</verbatim>
+
+---++ How to add a fortune to every page
+
+The =%<nop>FORTUNE% macro can be added to the bottom of each page by copying [[%SYSTEMWEB%.WebBottomBarExample]] to [[%SYSTEMWEB%.WebBottomBar]] and then adding the following before the copyright tag:
+<verbatim>
+<div style="padding:10px 0; text-align:center;"> %FORTUNE{"foswiki"}% </div>
+</verbatim>
 
 ---++ Creating new fortune files
 
@@ -44,14 +52,13 @@ Fortune files must be created by using the =strfile= command that is installed o
 
 ---+++ Create the fortune text file
 
-Using your favorite editor, build a simple text file consisting of each quote, followed by a single line containing a percent-sign ( =%= ) For example, file =foswiki= contains:
+Using your favorite editor, build a simple text file consisting of each fortune, followed by a single line containing a percent-sign ( =%= ).  Omit the final % after the last fortune.  For example, file =foswiki= contains:
 
 <sticky>
 <pre>
-Today there are a variety of wikis, one of them being the wiki you are presently looking at. 
+Today there are a variety of wikis, one of them being the wiki you are presently looking at.
 %
-Foswiki can be extended with hundreds of plugins 
-% 
+Foswiki can be extended with hundreds of plugins
 </pre>
 </sticky>
 
@@ -60,17 +67,17 @@ Foswiki can be extended with hundreds of plugins
 "Compile" the file into a =.dat= file using =strfile=
 <sticky>
 <pre>
-&gt; ~ $ strfile foswiki 
-"foswiki.dat" created 
-There were 2 strings 
-Longest string: 93 bytes 
-Shortest string: 49 bytes 
+&gt; ~ $ strfile foswiki
+"foswiki.dat" created
+There were 2 strings
+Longest string: 93 bytes
+Shortest string: 49 bytes
 </pre>
 </sticky>
 
 The original =foswiki= file and the related =foswiki.dat= file can be placed
 in the fortune database directory.  Or attach it to this topic or to another
-topic identified in the Foswiki configuration.  
+topic identified in the Foswiki configuration.
 
 For easiest system maintenance and upgrades, it is not recommended to modify
 or attach files to this topic!
@@ -83,5 +90,5 @@ or attach files to this topic!
 |  Version: | %$VERSION% |
 |  Home: | http://foswiki.org/Extensions/%TOPIC% |
 
-%META:FILEATTACHMENT{name="foswiki" attachment="foswiki" attr="" comment="" date="1231128584" path="foswiki" size="1323" stream="IO::File=GLOB(0x9d599a8)" tmpFilename="/usr/tmp/CGItemp11681" user="ProjectContributor" version="1"}%
-%META:FILEATTACHMENT{name="foswiki.dat" attachment="foswiki.dat" attr="" comment="" date="1231128606" path="foswiki.dat" size="72" stream="IO::File=GLOB(0x97fe450)" tmpFilename="/usr/tmp/CGItemp11713" user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="foswiki" attr="" comment="" date="1231128584" size="1323"  user="ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="foswiki.dat" attr="" comment="" date="1231128606" size="72" user="ProjectContributor" version="1"}%

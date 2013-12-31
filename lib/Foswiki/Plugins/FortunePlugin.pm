@@ -5,7 +5,7 @@
 ---+ package FortunePlugin
 
 Fortune Plugin will run either the Unix fortune_mod program "fortune" to access
-the traditional fortune database, or alternatively will use the CPAN Fortune 
+the traditional fortune database, or alternatively will use the CPAN Fortune
 module to access fortunes.
 
 =cut
@@ -15,37 +15,23 @@ package Foswiki::Plugins::FortunePlugin;
 # Always use strict to enforce variable scoping
 use strict;
 
+require File::Spec;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-# $VERSION is referred to by Foswiki, and is the only global variable that
-# *must* exist in this package.
-# This should always be $Rev$ so that Foswiki can determine the checked-in
-# status of the plugin. It is used by the build automation tools, so
-# you should leave it alone.
-our $VERSION = '0.9';
-
-# This is a free-form string you can use to "name" your own plugin version.
-# It is *not* used by the build automation tools, but is reported as part
-# of the version number in PLUGINDESCRIPTIONS.
-our $RELEASE = '0.9';
+our $VERSION = '1.0';
+our $RELEASE = '1.0';
 
 # Short description of this plugin
 # One line description, is shown in the %SYSTEMWEB%.TextFormattingRules topic:
 our $SHORTDESCRIPTION =
   'Fortune Plugin - Displays a random fortune from Unix/Linux fortune file';
 
-# You must set $NO_PREFS_IN_TOPIC to 0 if you want your plugin to use
-# preferences set in the plugin topic. This is required for compatibility
-# with older plugins, but imposes a significant performance penalty, and
-# is not recommended. Instead, leave $NO_PREFS_IN_TOPIC at 1 and use
-# =$Foswiki::cfg= entries set in =LocalSite.cfg=, or if you want the users
-# to be able to change settings, then use standard Foswiki preferences that
-# can be defined in your %USERSWEB%.SitePreferences and overridden at the web
-# and topic level.
 our $NO_PREFS_IN_TOPIC = 1;
 
 my $fortune_db;
+my $fdb_vol;
+my $fdb_path;
 my $fortune_bin;
 
 =begin TML
@@ -82,21 +68,24 @@ sub initPlugin {
         }
     }
 
-    $fortune_db = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath};
-    if ( !length($fortune_db) ) {
-        $fortune_db =
+    my $fdb;
+    if ( $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath} ) {
+        $fdb = $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath};
+    }
+    else {
+        $fdb =
             Foswiki::Func::getPubDir()
           . "/$Foswiki::cfg{SystemWebName}"
           . "/FortunePlugin/";
     }
-    elsif ( $fortune_db eq 'system' ) {
-        $fortune_db = '';
-    }
 
-    Foswiki::Func::writeDebug("FortuneDBPath set to $fortune_db ");
+    ( $fdb_vol, $fdb_path, ) = File::Spec->splitpath( $fdb, 1 );
+    $fdb = File::Spec->catpath( $fdb_vol, $fdb_path, '' );
 
-    if ( $fortune_db && !( -d $fortune_db ) ) {
-        Foswiki::Func::writeDebug('provided FortuneDBPath not found ');
+    Foswiki::Func::writeDebug("FortuneDBPath set to $fdb ");
+
+    if ( $fdb && !( -d $fdb ) ) {
+        Foswiki::Func::writeDebug("provided FortuneDBPath ($fdb) not found ");
         return 0;
     }
 
@@ -110,9 +99,9 @@ sub initPlugin {
 
 =begin TML
 
----++ _FORTUNE 
-Primary macro for the FortunePlugin.  Returns a single random fortune 
-from a random database.  
+---++ _FORTUNE
+Primary macro for the FortunePlugin.  Returns a single random fortune
+from a random database. 
 
   %<nop>FORTUNE{}%
   %<nop<FORTUNE{"foswiki"}%
@@ -140,19 +129,25 @@ sub _FORTUNE {
         }
     }
 
+    my $fdb = File::Spec->catpath( $fdb_vol, $fdb_path, $db );
+
+    unless ( -f $fdb ) {
+        return
+          "<span class=\"foswikiAlert\">Fortune database $db not found</span>";
+    }
+
     if ($fortune_bin) {
-        my $cdb = $fortune_db . $db;
         my ( $output, $exit ) =
           Foswiki::Sandbox->sysCommand( "$fortune_bin %DATABASE|U% $len ",
-            DATABASE => "$cdb" );
-        Foswiki::Func::writeDebug("$fortune_bin Length $len Database ^$cdb^");
+            DATABASE => "$fdb" );
+        Foswiki::Func::writeDebug("$fortune_bin Length $len Database ^$fdb^");
         return $output;
     }
     else {
         my $ffile = undef;
-        eval { $ffile = new Fortune( "$fortune_db" . "$db" ); };
+        eval { $ffile = new Fortune($fdb); };
         if ($@) {
-            return " *Error - Problem handling $fortune_db $db* \n";
+            return " *Error - Problem handling processing $db* \n";
         }
         $ffile->read_header();
         return ( $ffile->get_random_fortune() );
@@ -162,11 +157,11 @@ sub _FORTUNE {
 
 =begin TML
 
----++ _FORTUNE_LIST 
+---++ _FORTUNE_LIST
 Returns a formatted list of the fortunes from the specified database.
-Requires a single parameter of the database to list.           
+Requires a single parameter of the database to list.
 
- %<nop>FORTUNE_LIST{"scifi"}%                                
+ %<nop>FORTUNE_LIST{"scifi"}%
 
 Implementation:
 
@@ -180,12 +175,18 @@ sub _FORTUNE_LIST {
     my ( $session, $params, $theTopic, $theWeb ) = @_;
 
     my $db = $params->{_DEFAULT} || "foswiki";
+    my $fdb = File::Spec->catpath( $fdb_vol, $fdb_path, $db );
+
+    unless ( -f $fdb ) {
+        return
+          "<span class=\"foswikiAlert\">Fortune database $db not found</span>";
+    }
 
     if ($fortune_bin) {
-        my $cdb = $fortune_db . $db;
         my ( $output, $exit ) =
-          Foswiki::Sandbox->sysCommand( "$fortune_bin -m \".*\"  %DATABASE|F% ",
-            DATABASE => "$cdb" );
+          Foswiki::Sandbox->sysCommand( "$fortune_bin -m .*  %DATABASE|F% ",
+            DATABASE => "$fdb" );
+        Foswiki::Func::writeDebug("$fortune_bin -m '.*' Database ^$fdb^");
         $output =~ s/\n/<br \/>/g;                # Newlines become breaks
         $output =~ s/<br \/>%<br \/>/\n<li>/g;    # Percents become list entries
         $output =~ s/<li>$//g;                    # Remove trailing entry
@@ -193,19 +194,19 @@ sub _FORTUNE_LIST {
     }
     else {
         my $ffile = undef;
-        eval { $ffile = new Fortune( "$fortune_db" . "$db" ); };
+        eval { $ffile = new Fortune("$fdb"); };
         if ($@) {
-            return " *Error - Problem handling $fortune_db $db* \n";
+            return " *Error - Problem handling $fdb* \n";
         }
         $ffile->read_header();
         my $num_fortunes = $ffile->num_fortunes();
         &Foswiki::Func::writeDebug(
-            "FortunePlugin  - " . $num_fortunes . $fortune_db . $db );
+            "FortunePlugin  - " . $num_fortunes . $fdb );
         my $output = "<ul>";
         for ( my $i = 0 ; $i < $num_fortunes ; $i++ ) {
             &Foswiki::Func::writeDebug(
                 "FortunePlugin  - " . $i . " = " . $ffile->read_fortune($i) );
-            $output .= "<li>" . $ffile->read_fortune($i);
+            $output .= "<li> " . $ffile->read_fortune($i);
         }
         $output .= "\n</ul>\n";
         return $output;
@@ -215,15 +216,15 @@ sub _FORTUNE_LIST {
 
 =begin TML
 
----++ _FORTUNE_DB_LIST 
-Returns a formatted list of the fortune files found in the path specfied 
-in the configuration file. No parameters supported.           
+---++ _FORTUNE_DB_LIST
+Returns a formatted list of the fortune files found in the path specfied
+in the configuration file. No parameters supported.
 
  %<nop>FORTUNE_DB_LIST{}%
 
 Uses perl functions to list the =.dat= files in the fortune database directory.
 
-For each file, either use fortune -m . , and count % delimiters,  or use Fortune module 
+For each file, either use fortune -m . , and count % delimiters,  or use Fortune module
 to count the number of fortunes in the file.
 
 =cut
@@ -233,28 +234,31 @@ sub _FORTUNE_DB_LIST {
 
   #SMELL:  "fortune -f" sends the results to stderr.  So Sandbox cannot be used.
 
+    my $fdb = File::Spec->catpath( $fdb_vol, $fdb_path, '' );
+
     my $output = undef;
     if ($fortune_bin) {
-        $output = `$fortune_bin -f $fortune_db 2>&1`;
+        $output = `$fortune_bin -f $fdb 2>&1`;
         $output =~ s/^100.*+$//m
           ;   #Remove the file path statement.  Don't reveal system information.
         return "<pre>" . $output . "\n </pre>\n";
     }
     else {
-        opendir( DIR, $fortune_db )
-          || die "<ERR> Can't find directory --> $fortune_db !";
+        opendir( DIR, $fdb )
+          || die "<ERR> Can't find directory --> $fdb !";
         my @fdbs = grep { /\.dat$/ } readdir(DIR);
         @fdbs   = sort (@fdbs);
         $output = "\n| *Fortune Count* | *Database Name* |\n";
-        foreach my $fdb (@fdbs) {
-            $fdb = substr( $fdb, 0, -4 );
+        foreach my $f (@fdbs) {
+            $f = substr( $f, 0, -4 );
+            my $fn = File::Spec->catpath( $fdb_vol, $fdb_path, $f );
             my $ffile = undef;
-            eval { $ffile = new Fortune( "$fortune_db" . "$fdb" ); };
+            eval { $ffile = new Fortune("$fn"); };
             if ($@) {
-                return " *Error - Problem handling $fortune_db.$fdb* \n";
+                return " *Error - Problem handling $fn\n";
             }
             $ffile->read_header();
-            $output .= "| " . $ffile->num_fortunes() . " | " . $fdb . " |\n";
+            $output .= "| " . $ffile->num_fortunes() . " | " . $f . " |\n";
         }
         $output .= "\n</ul>\n";
         return $output;
