@@ -13,3 +13,4 @@ $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneDBPath} = '';
 # is not available, the plugin will attempt to use any fortune program found on the path.   Typically
 # the system fortune program installed by the <tt>fortune-mod</tt> package is <tt>/usr/bin/fortune</tt>.
 $Foswiki::cfg{Plugins}{FortunePlugin}{FortuneProgram} = '';
+1;
