@@ -19,8 +19,8 @@ require File::Spec;
 require Foswiki::Func;       # The plugins API
 require Foswiki::Plugins;    # For the API version
 
-our $VERSION = '1.0';
-our $RELEASE = '1.0';
+our $VERSION = '1.1';
+our $RELEASE = '1.1';
 
 # Short description of this plugin
 # One line description, is shown in the %SYSTEMWEB%.TextFormattingRules topic:
@@ -278,7 +278,7 @@ This copyright information applies to the FortunePlugin:
 
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# FortunePlugin is Copyright (C) 2008, 2013 Foswiki Contributors.
+# FortunePlugin is Copyright (C) 2008, 2013-2015 Foswiki Contributors.
 #
 # Foswiki Contributors
 # are listed in the AUTHORS file in the root of this distribution.
